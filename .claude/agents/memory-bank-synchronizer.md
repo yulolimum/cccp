@@ -30,7 +30,7 @@ Your primary responsibilities:
    - User stories and requirements
 
 8. **Maintain Historical Context**: ALWAYS preserve:
-   - Session achievements and work logs (CLAUDE-activeContext.md)
+   - Session achievements and work logs (CLAUDE-active-context.md)
    - Troubleshooting documentation and solutions
    - Bug fix histories and lessons learned
    - Decision rationales and trade-offs made
