@@ -1,3 +1,3 @@
 # Cline's Memory Bank
 
-Read and use @.claude/CLAUDE.md for instructions
+Read and use @CLAUDE.md for instructions

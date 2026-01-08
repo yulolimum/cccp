@@ -51,7 +51,7 @@ When working on Claude Code features (hooks, skills, subagents, MCP servers, etc
 
 ## Custom Project Rules
 
-**IMPORTANT:** Read these project-specific coding standards and conventions found in this folder: @/rules/
+**IMPORTANT:** Read these project-specific coding standards and conventions found in this folder: @.claude/rules/
 
 These rules define the project's coding standards and must be followed for all code changes.
 
