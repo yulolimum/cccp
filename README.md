@@ -79,7 +79,6 @@ Both tools will automatically load your custom rules and memory bank!
 
 ### Agents (Subagents)
 - **code-searcher** - Efficiently searches and analyzes codebase
-- **get-current-datetime** - Gets accurate timestamps for file creation
 - **memory-bank-synchronizer** - Keeps documentation in sync with code
 - **ux-design-expert** - Provides UX/UI design guidance
 
