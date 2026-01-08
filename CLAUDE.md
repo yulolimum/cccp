@@ -4,7 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## AI Guidance
 
-* Ignore GEMINI.md and GEMINI-*.md files
 * To save main context space, for code searches, inspections, troubleshooting or analysis, use code-searcher subagent where appropriate - giving the subagent full context background for the task(s) you assign it.
 * ALWAYS read and understand relevant files before proposing code edits. Do not speculate about code you have not inspected. If the user references a specific file/path, you MUST open and inspect it before explaining or proposing fixes. Be rigorous and persistent in searching code for key facts. Thoroughly review the style, conventions, and abstractions of the codebase before implementing new features or abstractions.
 * After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.
@@ -53,6 +52,16 @@ When asked to backup Memory Bank System files, you will copy the core context fi
 ## Claude Code Official Documentation
 
 When working on Claude Code features (hooks, skills, subagents, MCP servers, etc.), use the `claude-docs-consultant` skill to selectively fetch official documentation from docs.claude.com.
+
+## Custom Project Rules
+
+**IMPORTANT:** Read these project-specific coding standards and conventions:
+
+* **@.claude/rules/agent-behavior-rules.md** - Communication style, banned phrases, question strategy
+* **@.claude/rules/general-programming-rules.md** - Comments, naming conventions, module exports, function definitions, event handlers, boolean naming
+* **@.claude/rules/react-rules.md** - React component patterns, prop handling, hooks usage
+
+These rules define the project's coding standards and must be followed for all code changes.
 
 ## Project Overview
 
@@ -103,7 +112,7 @@ ls -la              # OK for single directory view
 ### Use These Faster Tools Instead
 
 ```bash
-# ripgrep (rg) - content search 
+# ripgrep (rg) - content search
 rg "search_term"                # Search in all files
 rg -i "case_insensitive"        # Case-insensitive
 rg "pattern" -t py              # Only Python files
