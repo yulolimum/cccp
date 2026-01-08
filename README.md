@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="400" alt="CCCP Logo" src="https://github.com/user-attachments/assets/d336bec4-60c7-4e3e-8019-9529d9fe7c6f" />
+<img width="280" alt="CCCP Logo" src="https://github.com/user-attachments/assets/d336bec4-60c7-4e3e-8019-9529d9fe7c6f" />
 
 # CCCP
 **Claude Code Cline Powerhouse**
@@ -102,7 +102,7 @@ Both tools will automatically load your custom rules and memory bank!
 
 ## Credits
 
-This project is a streamlined fork of [centminmod/my-claude-code-setup](https://github.com/centminmod/my-claude-code-setup), focused on Cline + Claude Code collaboration.
+This project is a based on [centminmod/my-claude-code-setup](https://github.com/centminmod/my-claude-code-setup), focused on Cline + Claude Code collaboration.
 
 ## License
 See [LICENSE](LICENSE) file for details.
