@@ -4,7 +4,7 @@ You are a memory bank optimization specialist tasked with reducing token usage i
 
 ## Task Overview
 
-Analyze the project's memory bank files (CLAUDE-*.md, CLAUDE.md, README.md) to identify and eliminate token waste through:
+Analyze the project's memory bank files (.claude/memory/*.md, CLAUDE.md, README.md) to identify and eliminate token waste through:
 
 1. **Duplicate content removal**
 2. **Obsolete file elimination**
@@ -18,15 +18,15 @@ Analyze the project's memory bank files (CLAUDE-*.md, CLAUDE.md, README.md) to i
 
 ```bash
 # Get comprehensive file size analysis
-find . -name "CLAUDE-*.md" -exec wc -c {} \; | sort -nr
-wc -c CLAUDE.md README.md
+find .claude/memory -name "*.md" -not -name ".gitkeep" -exec wc -c {} \; | sort -nr
+wc -c .claude/CLAUDE.md README.md
 ```
 
 **Examine for:**
 
-- Files marked as "REMOVED" or "DEPRECATED"
-- Generated content that's no longer current (reviews, temporary files)
-- Multiple files covering the same topic area
+- Stale content in active-context.md (completed tasks, old todos)
+- Obsolete patterns in project-patterns.md
+- Outdated decisions in project-brief.md
 - Verbose documentation that could be streamlined
 
 ### 2. Identify Optimization Opportunities
@@ -51,38 +51,37 @@ wc -c CLAUDE.md README.md
 
 ## Optimization Strategy
 
-### Phase 1: Remove Obsolete Content (Highest Impact)
+### Phase 1: Remove Stale Content (Highest Impact)
 
-**Target:** Files marked as removed, deprecated, or clearly obsolete
+**Target:** Completed tasks and outdated notes in active-context.md
 
 **Actions:**
 
-1. Delete files marked as "REMOVED" or "DEPRECATED"
-2. Remove generated reviews/reports that are outdated
-3. Clean up empty or minimal temporary files
-4. Update CLAUDE.md references to removed files
+1. Clean up completed tasks in active-context.md
+2. Remove stale scratch notes
+3. Archive finished work
+4. Preserve incomplete todos
 
-**Expected Savings:** 30-50KB typically
+**Expected Savings:** 5-15KB typically
 
 ### Phase 2: Consolidate Overlapping Documentation (High Impact)
 
-**Target:** Multiple files covering the same functional area
+**Target:** Duplicate information across memory bank files
 
 **Common Consolidation Opportunities:**
 
-- **Security files:** Combine security-fixes, security-optimization, security-hardening into one comprehensive file
-- **Performance files:** Merge performance-optimization and test-suite documentation
-- **Architecture files:** Consolidate detailed architecture descriptions
-- **Testing files:** Combine multiple test documentation files
+- **Architecture decisions + troubleshooting** in project-brief.md
+- **Code patterns + conventions** in project-patterns.md
+- **Active work + scratch notes** in active-context.md
 
 **Actions:**
 
-1. Create consolidated files with comprehensive coverage
-2. Ensure all essential information is preserved
-3. Remove the separate files
-4. Update all references in CLAUDE.md
+1. Identify duplicate content between files
+2. Move content to appropriate file
+3. Remove duplication
+4. Update references in CLAUDE.md
 
-**Expected Savings:** 20-40KB typically
+**Expected Savings:** 10-20KB typically
 
 ### Phase 3: Streamline CLAUDE.md (Medium Impact)
 
@@ -159,7 +158,7 @@ wc -c CLAUDE.md README.md
 
 ```bash
 # Create todo list for tracking
-TodoWrite with optimization phases and specific files
+TodoWrite with optimization phases for .claude/memory/*.md files
 ```
 
 ### 2. Execute by Priority
@@ -180,7 +179,7 @@ TodoWrite with optimization phases and specific files
 
 ```bash
 # Calculate savings achieved
-find . -name "CLAUDE-*.md" -not -path "*/archive/*" -exec wc -c {} \; | awk '{sum+=$1} END {print sum}'
+find .claude/memory -name "*.md" -not -name ".gitkeep" -exec wc -c {} \; | awk '{sum+=$1} END {print sum}'
 ```
 
 ## Expected Outcomes
@@ -238,25 +237,13 @@ find . -name "CLAUDE-*.md" -not -path "*/archive/*" -exec wc -c {} \; | awk '{su
 
 ### Consolidated File Format
 
-```markdown
-# CLAUDE-[topic]-comprehensive.md
+Memory bank files follow the 3-file structure:
 
-**Last Updated**: [Date]
-**Status**: ✅ [Status Description]
-**Coverage**: [What this file consolidates]
+- **active-context.md** - Current work and progress
+- **project-brief.md** - Project overview and architectural knowledge
+- **project-patterns.md** - Code conventions and patterns
 
-## Executive Summary
-[Overview of complete topic coverage]
-
-## [Major Section 1]
-[Comprehensive coverage of subtopic]
-
-## [Major Section 2] 
-[Comprehensive coverage of subtopic]
-
-## [Cross-cutting Concerns]
-[Information spanning multiple original files]
-```
+When consolidating within these files, use clear section headers to organize content.
 
 ### Archive File Format
 

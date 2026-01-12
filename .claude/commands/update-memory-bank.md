@@ -1,0 +1,1 @@
+Can you update memory bank files (project-brief.md, active-context.md, project-patterns.md).

@@ -1,5 +1,4 @@
 {
-  "model": "sonnet",
   "cleanupPeriodDays": 365,
   "hooks": {
     "Stop": [
