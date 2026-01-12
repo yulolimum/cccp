@@ -15,7 +15,7 @@ A unified configuration repository that enables seamless collaboration between C
 
 CCCP provides a standardized setup for using both **Cline** (VS Code extension) and **Claude Code** (Anthropic's official CLI/extension) in the same project. It includes:
 
-- **Shared memory bank** (`CLAUDE.md`) - Both tools read the same context and project knowledge
+- **Shared memory bank** (`CLAUDE.md` + `.claude/memory/`) - Both tools read the same context and project knowledge through a streamlined 3-file system
 - **Custom coding rules** - Consistent standards enforced across both AI assistants
 - **Claude Code features** - Agents, commands, and skills for advanced workflows
 - **Zero configuration** - Works out of the box for both tools
