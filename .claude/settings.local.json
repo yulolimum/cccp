@@ -29,6 +29,7 @@
       "Bash(sed:*)",
       "Bash(true)",
       "Skill(claude-docs-consultant)",
+      "Skill(generate-pr-description)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)",
       "WebSearch"
