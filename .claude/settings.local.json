@@ -10,11 +10,14 @@
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
+      "Bash(.claude/scripts/rotate-handoff.sh:*)",
+      "Write(.claude/memory/handoff/LATEST.md)",
       "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(chmod:*)",
       "Bash(cp:*)",
       "Bash(curl:*)",
+      "Bash(date:*)",
       "Bash(echo:*)",
       "Bash(env)",
       "Bash(fd:*)",
@@ -30,11 +33,25 @@
       "Bash(true)",
       "Skill(claude-docs-consultant)",
       "Skill(generate-pr-description)",
+      "Skill(typescript-script-developer)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)",
       "WebSearch"
     ],
     "deny": [],
     "defaultMode": "plan"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -title 'Claude Code' -subtitle 'Session Complete' -message \"Finished working in $(basename \"$PWD\")\" -sound default -timeout 10"
+          }
+        ]
+      }
+    ]
   }
 }

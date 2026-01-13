@@ -80,6 +80,7 @@ Both tools will automatically load your custom rules and memory bank!
 ### Agents (Subagents)
 - **code-searcher** - Efficiently searches and analyzes codebase
 - **memory-bank-synchronizer** - Keeps documentation in sync with code
+- **session-interrogation** - Proactively queries session handoff snapshots when detecting continuation intent or context gaps
 - **ux-design-expert** - Provides UX/UI design guidance
 
 ### Commands (Slash Commands)
@@ -87,6 +88,7 @@ Both tools will automatically load your custom rules and memory bank!
 - **/ccusage-daily** - Generates Claude Code usage cost analysis
 - **/cleanup-context** - Optimizes memory bank to reduce token usage
 - **/explain-architecture-pattern** - Identifies and explains architectural patterns
+- **/session-handoff** - Creates structured session snapshots for continuity across context resets
 - **/update-memory-bank** - Updates CLAUDE.md and memory bank files
 
 ### Skills

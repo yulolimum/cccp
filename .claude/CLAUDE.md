@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## AI Guidance
 
 - Use code-searcher subagent for code searches, inspections, troubleshooting to save context
+- Check for continuation intent: If user's first message suggests continuing prior work or references unknown context, use session-interrogation agent silently to load handoff context before responding
 - Read files before proposing edits. Never speculate about unread code. If user references a file, read it first
 - Reflect on tool results quality before determining next action
 - Summarize after completing tasks
@@ -42,6 +43,15 @@ Read in this order:
    - Semi-static: Evolves with codebase
 
 **Important:** Always check active-context.md first to understand what's currently being worked on and maintain session continuity.
+
+### Session Handoff System
+
+If user shows continuation intent or references unknown context:
+- Proactively check `.claude/memory/handoff/LATEST.md` via session-interrogation agent
+- Silent load - use context without announcement unless directly relevant
+- Handoff contains: prior goals, decisions, file changes, next steps, open questions
+
+**Continuation signals**: "continue", "resume", "last time", "previous session", references to unknown work
 
 ## Claude Code Official Documentation
 
