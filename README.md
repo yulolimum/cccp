@@ -75,6 +75,79 @@ Both tools will automatically load your custom rules and memory bank!
 
 ---
 
+## Usage Recipes
+
+### 1) Bootstrap a New Project
+**Goal:** Get shared context and rules working on day one.
+
+1. Copy this repo into your project root
+2. Edit `CLAUDE.md` with your project overview and constraints
+3. Add initial notes to `.claude/memory/project-brief.md`
+4. Start a Claude Code session and ask it to summarize architecture
+
+### 2) Daily Work Loop (Cline + Claude Code)
+**Goal:** Keep context consistent across tools.
+
+1. In Cline, work normally with `.clinerules` and `.claude/rules/`
+2. In Claude Code, reference the same files for shared standards
+3. When you finish a feature, run `/update-memory-bank`
+4. If a session ends mid-task, run `/session-handoff`
+
+### 3) Resume Previous Work
+**Goal:** Pick up exactly where you left off.
+
+1. Start session with "continue" or "resume"
+2. `session-interrogation` agent loads handoff context silently
+3. Review TODO from handoff, continue with full context
+
+### 4) Fast Architecture Orientation
+**Goal:** Ramp up on a repo quickly without hunting for docs.
+
+1. Ask Claude Code to read `README.md` and `.claude/memory/project-brief.md`
+2. Use `/explain-architecture-pattern` on key modules or folders
+3. Capture decisions in `.claude/memory/project-patterns.md`
+
+### 5) Debug and Fix a Bug
+**Goal:** Find, fix, and document a bug end-to-end.
+
+1. Use `code-searcher` agent to locate relevant code
+2. Track investigation in `active-context.md`
+3. Fix the bug
+4. Run `/update-memory-bank` to capture solution patterns
+5. Run `/generate-pr-description` for the fix PR
+
+### 6) Multi-Session Refactor
+**Goal:** Execute large refactor without losing context.
+
+1. Plan in `active-context.md`
+2. Use `code-searcher` agent to map affected files
+3. Make changes incrementally
+4. Run `/session-handoff` at end of each session
+5. Use `memory-bank-synchronizer` when patterns change
+
+### 7) Ship a PR
+**Goal:** Generate well-documented PR description.
+
+1. Complete feature work
+2. Run `/generate-pr-description` skill
+3. Copy generated markdown into GitHub PR
+
+### 8) Token-Efficient Code Analysis
+**Goal:** Analyze large codebase with minimal tokens.
+
+1. Use `code-searcher` with CoD (Chain of Draft) mode: "Use CoD to find [pattern]"
+2. Get compressed symbolic results (80-90% token reduction)
+3. Expand specific areas as needed
+
+**Example — finding auth logic:**
+
+| Mode | Output |
+|------|--------|
+| Standard | "I'll search for authentication logic by first looking for auth-related files, then examining login functions, checking for JWT implementations..." |
+| CoD | `Auth→glob:*auth*→grep:login|jwt→found:auth.service:45→implements:JWT+bcrypt` |
+
+---
+
 ## Claude Code Features
 
 ### Agents (Subagents)
