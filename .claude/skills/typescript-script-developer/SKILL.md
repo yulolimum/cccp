@@ -148,7 +148,7 @@ If `--help` is passed, print usage information and exit. Copy and paste this sec
 // Help
 //
 if (parsedArgs.help) {
-  log(`Usage: tsx ${scriptName}.ts [options]
+  log(`Usage: ${scriptCommand} [options]
 
 Options:
   --name <string>   Your name
@@ -299,7 +299,7 @@ function debug(...args: Parameters<typeof console.log>) {
 // Help
 //
 if (parsedArgs.help) {
-  log(`Usage: tsx ${scriptName}.ts [options]
+  log(`Usage: ${scriptCommand} [options]
 
 Options:
   --name <string>   Your name
