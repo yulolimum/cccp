@@ -40,10 +40,10 @@ Every script should follow the following structure in the exact order:
 This section should import all necessary libraries at the top of the file.
 
 ```typescript
-process.env.FORCE_COLOR ||= '1'
+process.env.FORCE_COLOR ||= "1"
 
-import path from 'node:path'
-import input from '@inquirer/input'
+import path from "node:path"
+import input from "@inquirer/input"
 ```
 
 ### Constants
@@ -54,7 +54,7 @@ Define any constants that will be used throughout the script.
 //
 // Constants
 //
-const scriptName = 'demo-patterns'
+const scriptName = "demo-patterns"
 const scriptCommand = `pnpm demo:patterns`
 ```
 
@@ -70,9 +70,9 @@ type ArgNames = keyof typeof parsedArgs
 type Args = { [K in ArgNames]: NonNullable<(typeof parsedArgs)[K]> }
 
 const args = minimist(process.argv.slice(2), {
-  boolean: ['verbose', 'help'],
-  string: ['name', 'count'],
-  alias: { v: 'verbose', h: 'help' },
+  boolean: ["verbose", "help"],
+  string: ["name", "count"],
+  alias: { v: "verbose", h: "help" },
 })
 
 const parsedArgs = {
@@ -101,8 +101,8 @@ type Cache = {
 }
 
 const repoRoot = process.cwd()
-const cacheDir = path.join(repoRoot, 'node_modules', '.cache', scriptName)
-const cacheFile = path.join(cacheDir, 'cache.json')
+const cacheDir = path.join(repoRoot, "node_modules", ".cache", scriptName)
+const cacheFile = path.join(cacheDir, "cache.json")
 
 async function readCache(): Promise<Cache> {
   try {
@@ -179,15 +179,15 @@ const name = await (async function () {
     response = parsedArgs.name
   } else {
     response = await input({
-      message: 'Enter your name:',
-      default: cache.args.name ?? '',
+      message: "Enter your name:",
+      default: cache.args.name ?? "",
     })
   }
 
   cache.args.name = response
   accumulatedArgs.name = response
 
-  debug('name:', response)
+  debug("name:", response)
   await writeCache(cache)
 
   return response
@@ -220,17 +220,17 @@ log(`\nYou can re-run this script with same settings using the following command
 ## Full Script Example
 
 ```typescript
-process.env.FORCE_COLOR ||= '1'
+process.env.FORCE_COLOR ||= "1"
 
-import input from '@inquirer/input'
-import path from 'node:path'
-import process from 'node:process'
-import { fs, minimist } from 'zx'
+import input from "@inquirer/input"
+import path from "node:path"
+import process from "node:process"
+import { fs, minimist } from "zx"
 
 //
 // Constants
 //
-const scriptName = 'demo-patterns'
+const scriptName = "demo-patterns"
 const scriptCommand = `pnpm demo:patterns`
 
 //
@@ -240,9 +240,9 @@ type ArgNames = keyof typeof parsedArgs
 type Args = { [K in ArgNames]: NonNullable<(typeof parsedArgs)[K]> }
 
 const args = minimist(process.argv.slice(2), {
-  boolean: ['verbose', 'help'],
-  string: ['name', 'count'],
-  alias: { v: 'verbose', h: 'help' },
+  boolean: ["verbose", "help"],
+  string: ["name", "count"],
+  alias: { v: "verbose", h: "help" },
 })
 
 const parsedArgs = {
@@ -265,8 +265,8 @@ type Cache = {
 }
 
 const repoRoot = process.cwd()
-const cacheDir = path.join(repoRoot, 'node_modules', '.cache', scriptName)
-const cacheFile = path.join(cacheDir, 'cache.json')
+const cacheDir = path.join(repoRoot, "node_modules", ".cache", scriptName)
+const cacheFile = path.join(cacheDir, "cache.json")
 
 async function readCache(): Promise<Cache> {
   try {
@@ -321,15 +321,15 @@ const name = await (async function () {
     response = parsedArgs.name
   } else {
     response = await input({
-      message: 'Enter your name:',
-      default: cache.args.name ?? '',
+      message: "Enter your name:",
+      default: cache.args.name ?? "",
     })
   }
 
   cache.args.name = response
   accumulatedArgs.name = response
 
-  debug('name:', response)
+  debug("name:", response)
   await writeCache(cache)
 
   return response
@@ -342,15 +342,15 @@ const count = await (async function () {
     response = parsedArgs.count
   } else {
     response = await input({
-      message: 'Enter count:',
-      default: cache.args.count ?? '1',
+      message: "Enter count:",
+      default: cache.args.count ?? "1",
     })
   }
 
   cache.args.count = response
   accumulatedArgs.count = response
 
-  debug('count:', response)
+  debug("count:", response)
   await writeCache(cache)
 
   return response
@@ -365,7 +365,7 @@ const config = (function () {
     count: Number(count),
   }
 
-  debug('Config:', JSON.stringify(config, null, 2))
+  debug("Config:", JSON.stringify(config, null, 2))
 
   return config
 })()
@@ -376,7 +376,7 @@ const config = (function () {
 const results = await (async function () {
   const results = []
 
-  log('Processing data...')
+  log("Processing data...")
 
   for (let i = 0; i < config.count; i++) {
     debug(`Processing item ${i + 1}...`)
@@ -397,9 +397,18 @@ const results = await (async function () {
 })()
 
 if (results.length === 0) {
-  log('No results found')
+  log("No results found")
 } else {
   console.table(results)
+}
+
+//
+// Execute command
+//
+try {
+  await $({ stdio: "inherit" })`echo "Hello ${config.name}"`
+} catch (error) {
+  log("\nCommand failed:", (error as Error).message)
 }
 
 //
