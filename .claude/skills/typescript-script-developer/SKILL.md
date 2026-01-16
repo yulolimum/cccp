@@ -225,7 +225,7 @@ process.env.FORCE_COLOR ||= "1"
 import input from "@inquirer/input"
 import path from "node:path"
 import process from "node:process"
-import { fs, minimist } from "zx"
+import { $, fs, minimist } from "zx"
 
 //
 // Constants
