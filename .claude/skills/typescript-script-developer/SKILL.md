@@ -7,9 +7,10 @@ description: Write TypeScript automation scripts using Inquirer.js modular packa
 
 You write small, focused **TypeScript** scripts for automation and repo maintenance. Prefer correctness, clear UX, and predictable behavior over cleverness.
 
-## Defaults
+## Architecture
 
 - **Execution:** `tsx <script>.ts`
+- **Execution context:** Should be added to the active workspace package.json scripts as needed (e.g. `pnpm <script>:run`)
 - **Language/runtime:** TypeScript + Node (ESM) with **top-level await**
 - **Tooling:**
   - **Inquirer.js modular packages** for prompts (install individual: `@inquirer/select`, `@inquirer/input`, `@inquirer/confirm`)
@@ -17,115 +18,99 @@ You write small, focused **TypeScript** scripts for automation and repo maintena
 - **Args:** parse with **minimist** (shipped with zx)
 - **Cache:** persist user state in:
   - `node_modules/.cache/<script-name>/cache.json`
-- **Logging:**
-  - `log(...)` — user-facing progress/output (minimal, readable)
-  - `debug(...)` — noisy internals, enabled with `--verbose`
 
-## Input rules
+## Structure
 
-- **ALWAYS show prompts** - never hide inputs even when values exist from CLI args or cache
-- Prefill prompts with values in this order: **CLI args → cache → fallback default**
-- Use the `default` property to prefill all prompts
-- **Validate where it makes sense**:
-  - `select()` constrains choices (acts as validation)
-  - `input()` must include `validate` function for free-form inputs
-- On invalid input: return error message from `validate` function or print to **stderr** and exit with code **1**.
+Every script should follow the following structure in the exact order:
 
-## Prompts
+- Imports (standard libs, inquirer packages, zx, minimist, process, path)
+- Constants (things reused throughout the script)
+- Arguments parsing (minimist)
+- Cache (read/write functions, load cache)
+- Logging setup (if `--verbose`, enable debug logs)
+- Help (if `--help`, print usage and exit)
+- Main body of the script (order depends on script purpose):
+  - Inputs (prompts with Inquirer.js)
+  - Logic/processing
+  - Optional execution (shell commands with zx `$`, only if necessary)
+- Output repeatable CLI command
 
-Use Inquirer.js modular packages (import individually):
+### Imports
 
-- `import select from '@inquirer/select'` for constrained choices
-- `import confirm from '@inquirer/confirm'` for yes/no questions
-- `import input from '@inquirer/input'` for free-form text with validation
+This section should import all necessary libraries at the top of the file.
 
-**CRITICAL**: Always prefill prompts with `default` property from CLI args → cache → fallback. Never conditionally skip prompts.
-
-## Caching behavior
-
-- Cache must live at the repo root under `node_modules/.cache`.
-- Namespace cache data by feature inside the JSON.
-- Reads must tolerate missing or invalid files.
-- Writes must be awaited.
-
-## Execution
-
-- Use zx `$` when executing shell commands.
-- Do not force shell usage when it is unnecessary.
-
-## Output requirements
-
-When generating a script, include:
-
-- `## Usage`
-- `## Options`
-- `## Examples`
-- A single, complete TypeScript file unless otherwise requested
-
-## Canonical template
-
-```ts
+```typescript
 process.env.FORCE_COLOR ||= '1'
 
-import confirm from '@inquirer/confirm'
-import input from '@inquirer/input'
-import select from '@inquirer/select'
 import path from 'node:path'
-import process from 'node:process'
-import { fs, minimist, $ } from 'zx'
+import input from '@inquirer/input'
+```
 
-const SCRIPT_NAME = 'my-script'
+### Constants
 
-// ── args ─────────────────────────────────────────────────────────────
+Define any constants that will be used throughout the script.
+
+```typescript
+//
+// Constants
+//
+const scriptName = 'demo-patterns'
+const scriptCommand = `pnpm demo:patterns`
+```
+
+### Arguments Parsing
+
+Use minimist to parse, process, and create accumulators for command-line arguments. Copy and paste this as is, only modify to use specific flags and args.
+
+```typescript
+//
+// Arguments
+//
+type ArgNames = keyof typeof parsedArgs
+type Args = { [K in ArgNames]: NonNullable<(typeof parsedArgs)[K]> }
 
 const args = minimist(process.argv.slice(2), {
   boolean: ['verbose', 'help'],
-  string: ['platform', 'tag'],
+  string: ['name', 'count'],
   alias: { v: 'verbose', h: 'help' },
 })
 
-const VERBOSE = Boolean(args.verbose)
-
-// ── logging ──────────────────────────────────────────────────────────
-
-function log(...args: Parameters<typeof console.log>) {
-  console.log(...args)
+const parsedArgs = {
+  name: args.name as string | undefined,
+  count: args.count as string | undefined,
+  verbose: Boolean(args.verbose),
+  help: Boolean(args.help),
 }
 
-function debug(...args: Parameters<typeof console.log>) {
-  if (VERBOSE) console.log(`[${SCRIPT_NAME}]`, ...args)
+const accumulatedArgs: Partial<Args> = {
+  verbose: parsedArgs.verbose,
+  help: parsedArgs.help,
 }
+```
 
-if (args.help) {
-  log(`Usage: tsx ${SCRIPT_NAME}.ts [options]
+### Cache
 
-Options:
-  --platform <all|ios|android>
-  --tag <string>
-  --verbose, -v     Enable debug logs
-  --help, -h        Show help
-`)
-  process.exit(0)
+Implement read/write functions for caching arguments. Copy and paste this section as is.
+
+```typescript
+//
+// Cache
+//
+type Cache = {
+  args: Partial<Args>
 }
-
-// ── cache ────────────────────────────────────────────────────────────
 
 const repoRoot = process.cwd()
-const cacheDir = path.join(repoRoot, 'node_modules', '.cache', SCRIPT_NAME)
+const cacheDir = path.join(repoRoot, 'node_modules', '.cache', scriptName)
 const cacheFile = path.join(cacheDir, 'cache.json')
-
-type Cache = {
-  feature?: {
-    platform?: 'all' | 'ios' | 'android'
-    tag?: string
-  }
-}
 
 async function readCache(): Promise<Cache> {
   try {
-    return (await fs.readJson(cacheFile)) as Cache
+    const cache = (await fs.readJson(cacheFile)) as Cache
+    cache.args = cache.args || {}
+    return cache
   } catch {
-    return {}
+    return { args: {} }
   }
 }
 
@@ -135,60 +120,302 @@ async function writeCache(cache: Cache) {
 }
 
 const cache = await readCache()
-cache.feature ??= {}
+```
 
-// ── inputs ───────────────────────────────────────────────────────────
+### Logging
 
-// CLI → cache → prompt (ALWAYS show prompts with defaults)
-const defaultPlatform = (args.platform as Cache['feature']['platform']) ?? cache.feature.platform
-const platform = (await select({
-  message: 'Select platform:',
-  choices: [
-    { name: 'All', value: 'all' },
-    { name: 'iOS', value: 'ios' },
-    { name: 'Android', value: 'android' },
-  ],
-  default: defaultPlatform ?? 'all',
-})) as 'all' | 'ios' | 'android'
+Implement logging functions for user-facing logs and debug logs. Copy and paste this section as is.
 
-debug('platform:', platform)
+```typescript
+//
+// Logging
+//
+function log(...args: Parameters<typeof console.log>) {
+  console.log(...args)
+}
 
-// Free-form input with validation (conditionally spread default to avoid undefined)
-const defaultTag = args.tag as string | undefined
-const tag = await input({
-  message: 'Tag (letters/numbers/dash):',
-  ...(defaultTag && { default: defaultTag }),
-  validate: (value: string) => {
-    if (!/^[a-z0-9-]+$/i.test(value)) {
-      return 'Invalid tag. Use only letters, numbers, and dashes.'
-    }
-    return true
-  },
+function debug(...args: Parameters<typeof console.log>) {
+  if (parsedArgs.verbose) console.log(`[${scriptName}]`, ...args)
+}
+```
+
+### Help
+
+If `--help` is passed, print usage information and exit. Copy and paste this section as is, only modify the usage string.
+
+```typescript
+//
+// Help
+//
+if (parsedArgs.help) {
+  log(`Usage: tsx ${scriptName}.ts [options]
+
+Options:
+  --name <string>   Your name
+  --count <number>   Number of items
+  --verbose, -v      Enable debug logs
+  --help, -h         Show help
+`)
+  process.exit(0)
+}
+```
+
+### Main Body
+
+This section contains the main logic of the script, including prompts, processing, and optional execution. The structure here will vary based on the script's purpose.
+
+Here are some guidelines:
+
+- Inputs should use Inquirer.js packages for prompts.
+- Inputs should use the IIFE Pattern to encapsulate prompt logic.
+- Input response should be added to accumulatedArgs and cache after each prompt.
+- Input responses should be validated only when necessary using Inquirer.js validation options.
+
+```typescript
+const name = await (async function () {
+  let response: string
+
+  if (parsedArgs.name !== undefined) {
+    response = parsedArgs.name
+  } else {
+    response = await input({
+      message: 'Enter your name:',
+      default: cache.args.name ?? '',
+    })
+  }
+
+  cache.args.name = response
+  accumulatedArgs.name = response
+
+  debug('name:', response)
+  await writeCache(cache)
+
+  return response
+})()
+```
+
+### Output Repeatable CLI Command
+
+At the end of the script, output a repeatable CLI command that includes all accumulated arguments. Copy and paste this section as is.
+
+```typescript
+//
+// Repeatable CLI command
+//
+const stringArgs = Object.entries(accumulatedArgs).reduce((args, [key, value]) => {
+  if (typeof value === 'boolean') {
+    if (value) args += ` --${key}`
+    return args
+  } else if (value !== undefined) {
+    args += ` --${key} "${value}"`
+  }
+
+  return args
+}, '')
+
+log(`\nYou can re-run this script with same settings using the following command:\n`, `${scriptCommand} ${stringArgs}`)
+```
+
+## Full Script Example
+
+```typescript
+process.env.FORCE_COLOR ||= '1'
+
+import input from '@inquirer/input'
+import path from 'node:path'
+import process from 'node:process'
+import { fs, minimist } from 'zx'
+
+//
+// Constants
+//
+const scriptName = 'demo-patterns'
+const scriptCommand = `pnpm demo:patterns`
+
+//
+// Arguments
+//
+type ArgNames = keyof typeof parsedArgs
+type Args = { [K in ArgNames]: NonNullable<(typeof parsedArgs)[K]> }
+
+const args = minimist(process.argv.slice(2), {
+  boolean: ['verbose', 'help'],
+  string: ['name', 'count'],
+  alias: { v: 'verbose', h: 'help' },
 })
 
-debug('tag:', tag)
+const parsedArgs = {
+  name: args.name as string | undefined,
+  count: args.count as string | undefined,
+  verbose: Boolean(args.verbose),
+  help: Boolean(args.help),
+}
 
-// Confirmation prompt
-const proceed = await confirm({
-  message: 'Proceed?',
-  default: true,
-})
+const accumulatedArgs: Partial<Args> = {
+  verbose: parsedArgs.verbose,
+  help: parsedArgs.help,
+}
 
-if (!proceed) {
-  log('Cancelled')
+//
+// Cache
+//
+type Cache = {
+  args: Partial<Args>
+}
+
+const repoRoot = process.cwd()
+const cacheDir = path.join(repoRoot, 'node_modules', '.cache', scriptName)
+const cacheFile = path.join(cacheDir, 'cache.json')
+
+async function readCache(): Promise<Cache> {
+  try {
+    const cache = (await fs.readJson(cacheFile)) as Cache
+    cache.args = cache.args || {}
+    return cache
+  } catch {
+    return { args: {} }
+  }
+}
+
+async function writeCache(cache: Cache) {
+  await fs.ensureDir(cacheDir)
+  await fs.writeJson(cacheFile, cache, { spaces: 2 })
+}
+
+const cache = await readCache()
+
+//
+// Logging
+//
+function log(...args: Parameters<typeof console.log>) {
+  console.log(...args)
+}
+
+function debug(...args: Parameters<typeof console.log>) {
+  if (parsedArgs.verbose) console.log(`[${scriptName}]`, ...args)
+}
+
+//
+// Help
+//
+if (parsedArgs.help) {
+  log(`Usage: tsx ${scriptName}.ts [options]
+
+Options:
+  --name <string>   Your name
+  --count <number>   Number of items
+  --verbose, -v      Enable debug logs
+  --help, -h         Show help
+`)
   process.exit(0)
 }
 
-// ── optional execution ───────────────────────────────────────────────
-// await $`echo ${tag}`
+//
+// Script
+//
+const name = await (async function () {
+  let response: string
 
-// ── persist ──────────────────────────────────────────────────────────
+  if (parsedArgs.name !== undefined) {
+    response = parsedArgs.name
+  } else {
+    response = await input({
+      message: 'Enter your name:',
+      default: cache.args.name ?? '',
+    })
+  }
 
-// Cache all user inputs for next run
-if (platform) cache.feature.platform = platform
-if (tag) cache.feature.tag = tag
-await writeCache(cache)
+  cache.args.name = response
+  accumulatedArgs.name = response
 
-log('Done')
+  debug('name:', response)
+  await writeCache(cache)
+
+  return response
+})()
+
+const count = await (async function () {
+  let response: string
+
+  if (parsedArgs.count !== undefined) {
+    response = parsedArgs.count
+  } else {
+    response = await input({
+      message: 'Enter count:',
+      default: cache.args.count ?? '1',
+    })
+  }
+
+  cache.args.count = response
+  accumulatedArgs.count = response
+
+  debug('count:', response)
+  await writeCache(cache)
+
+  return response
+})()
+
+//
+// Build config
+//
+const config = (function () {
+  const config = {
+    name,
+    count: Number(count),
+  }
+
+  debug('Config:', JSON.stringify(config, null, 2))
+
+  return config
+})()
+
+//
+// Process data
+//
+const results = await (async function () {
+  const results = []
+
+  log('Processing data...')
+
+  for (let i = 0; i < config.count; i++) {
+    debug(`Processing item ${i + 1}...`)
+
+    const item = {
+      id: i + 1,
+      name: `${config.name} ${i + 1}`,
+      timestamp: new Date().toISOString(),
+    }
+
+    results.push(item)
+    debug(`Processed item: ${JSON.stringify(item)}`)
+  }
+
+  log(`Processed ${results.length} items total`)
+
+  return results
+})()
+
+if (results.length === 0) {
+  log('No results found')
+} else {
+  console.table(results)
+}
+
+//
+// Repeatable CLI command
+//
+const stringArgs = Object.entries(accumulatedArgs).reduce((args, [key, value]) => {
+  if (typeof value === 'boolean') {
+    if (value) args += ` --${key}`
+    return args
+  } else if (value !== undefined) {
+    args += ` --${key} "${value}"`
+  }
+
+  return args
+}, '')
+
+log(`\nYou can re-run this script with same settings using the following command:\n`, `${scriptCommand} ${stringArgs}`)
+
 export {}
 ```
