@@ -60,7 +60,7 @@ const scriptCommand = `pnpm demo:patterns`
 
 ### Arguments Parsing
 
-Use minimist to parse, process, and create accumulators for command-line arguments. Copy and paste this as is, only modify to use specific flags and args.
+Use minimist to parse, process, and create accumulators for command-line arguments. Argument names should always be camelCase. Copy and paste this as is, only modify to use specific flags and args.
 
 ```typescript
 //
@@ -203,15 +203,16 @@ At the end of the script, output a repeatable CLI command that includes all accu
 // Repeatable CLI command
 //
 const stringArgs = Object.entries(accumulatedArgs).reduce((args, [key, value]) => {
-  if (typeof value === 'boolean') {
+  if (value === undefined) return args
+
+  if (typeof value === "boolean") {
     if (value) args += ` --${key}`
-    return args
-  } else if (value !== undefined) {
+  } else {
     args += ` --${key} "${value}"`
   }
 
   return args
-}, '')
+}, "")
 
 log(`\nYou can re-run this script with same settings using the following command:\n`, `${scriptCommand} ${stringArgs}`)
 ```
@@ -405,15 +406,16 @@ if (results.length === 0) {
 // Repeatable CLI command
 //
 const stringArgs = Object.entries(accumulatedArgs).reduce((args, [key, value]) => {
-  if (typeof value === 'boolean') {
+  if (value === undefined) return args
+
+  if (typeof value === "boolean") {
     if (value) args += ` --${key}`
-    return args
-  } else if (value !== undefined) {
+  } else {
     args += ` --${key} "${value}"`
   }
 
   return args
-}, '')
+}, "")
 
 log(`\nYou can re-run this script with same settings using the following command:\n`, `${scriptCommand} ${stringArgs}`)
 
